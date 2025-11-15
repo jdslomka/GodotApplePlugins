@@ -47,6 +47,9 @@ xcframework: #xcframework-prep
 XCFRAMEWORK_GAMECENTER ?= $(CURDIR)/addons/GameCenter/bin/GameCenter.xcframework
 
 q:
+	make xcframework FRAMEWORK_NAMES=GameCenter DERIVED_DATA=~/DerivedData/GodotApplePlugins-*
+
+o:
 	rm -rf '$(XCFRAMEWORK_GAMECENTER)'; \
 	$(XCODEBUILD) -create-xcframework \
 		-framework ~/DerivedData/GodotApplePlugins-*/Build/Products/Debug-iphoneos/PackageFrameworks/GameCenter.framework/ \
