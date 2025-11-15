@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://bo8mk4s2810bd"]
+
+[ext_resource type="Script" uid="uid://k565oj0kotti" path="res://control.gd" id="1_0fbet"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_0fbet")
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 399.0
+offset_top = 242.0
+offset_right = 508.0
+offset_bottom = 273.0
+theme_override_font_sizes/font_size = 32
+text = "Authenticate"
+
+[node name="auth_result" type="Label" parent="."]
+layout_mode = 0
+offset_left = 406.0
+offset_top = 311.0
+offset_right = 1028.0
+offset_bottom = 356.0
+theme_override_font_sizes/font_size = 32
+text = "Auth Error:"
+
+[node name="auth_state" type="Label" parent="."]
+layout_mode = 0
+offset_left = 405.0
+offset_top = 379.0
+offset_right = 642.0
+offset_bottom = 424.0
+theme_override_font_sizes/font_size = 32
+text = "Authenticated: "
+
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
