@@ -20,7 +20,8 @@ class AppleAchievement: RefCounted, @unchecked Sendable {
     let achievement: GKAchievement
 
     required init(_ context: InitContext) {
-        fatalError("AppleAchievement should only be constructed via GameCenterManager")
+        achievement = GKAchievement()
+        super.init(context)
     }
 
     init?(identifier: String, player: ApplePlayer?) {
@@ -48,7 +49,8 @@ class AppleAchievement: RefCounted, @unchecked Sendable {
 class AppleAchievementDescription: RefCounted, @unchecked Sendable {
     var achievementDescription: GKAchievementDescription
     required init(_ context: InitContext) {
-        fatalError("AppleAchievement should only be constructed via GameCenterManager")
+        achievementDescription = GKAchievementDescription()
+        super.init(context)
     }
 
     init?(_ ad: GKAchievementDescription) {

@@ -25,7 +25,8 @@ class AppleLeaderboard: RefCounted, @unchecked Sendable {
     var board: GKLeaderboard
 
     required init(_ context: InitContext) {
-        fatalError("AppleLeaderboard should only be constructed via GameCenterManager")
+        board = GKLeaderboard()
+        super.init(context)
     }
 
     init?(board: GKLeaderboard) {
@@ -98,6 +99,4 @@ class AppleLeaderboard: RefCounted, @unchecked Sendable {
             }
         }
     }
-
-
 }

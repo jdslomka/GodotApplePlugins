@@ -123,6 +123,7 @@ class GameCenterManager: RefCounted, @unchecked Sendable {
     AppleLocalPlayer.self,
     ApplePlayer.self,
     AppleLeaderboard.self,
+    AppleLeaderboardSet.self,
     AppleAchievement.self,
     AppleAchievementDescription.self
 ])

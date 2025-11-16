@@ -19,7 +19,8 @@ import GameKit
 class ApplePlayer: RefCounted, @unchecked Sendable {
     var player: GKPlayer
     required init(_ context: InitContext) {
-        fatalError("ApplePlayer should only be constructed via GameCenterManager")
+        player = GKPlayer()
+        super.init(context)
     }
 
     @Export var gamePlayerID: String { player.gamePlayerID }
@@ -41,7 +42,7 @@ class ApplePlayer: RefCounted, @unchecked Sendable {
             if let img, let png = img.pngData() {
                 let array = PackedByteArray([UInt8](png))
                 DispatchQueue.main.async {
-                    callback.call(Variant(array))
+                    _ = callback.call(Variant(array))
                 }
             }
         }

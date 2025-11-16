@@ -51,7 +51,7 @@ XCFRAMEWORK_GAMECENTER ?= $(CURDIR)/addons/GameCenter/bin/GameCenter.xcframework
 
 # This one just gets me a GameCenter I can test on desktop quickly
 q:
-	make xcframework FRAMEWORK_NAMES=GameCenter DERIVED_DATA=~/DerivedData/GodotApplePlugins-*
+	make xcframework FRAMEWORK_NAMES=GameCenter
 
 o:
 	rm -rf '$(XCFRAMEWORK_GAMECENTER)'; \
