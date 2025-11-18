@@ -18,7 +18,7 @@ enum MatchType: Int, CaseIterable {
     case peerToPeer
     case hosted
     case turnBased
-    var gamekit: GameKit.GKMatchType {
+    func toGameKit() -> GameKit.GKMatchType {
         switch self {
         case .peerToPeer: return .peerToPeer
         case .hosted: return .hosted
@@ -45,10 +45,9 @@ class GKMatchRequest: RefCounted, @unchecked Sendable {
         set { request.defaultNumberOfPlayers = newValue }
     }
 
-    // TODO: add support for enumerations in both _argumentPropInfo and fetchArguments
     @Callable
-    static func maxPlayersAllowedForMatch(forType: Int) -> Int {
-        GameKit.GKMatchRequest.maxPlayersAllowedForMatch(of: MatchType(rawValue: forType)!.gamekit)
+    static func max_players_allowed_for_match(forType: MatchType) -> Int {
+        return GameKit.GKMatchRequest.maxPlayersAllowedForMatch(of: forType.toGameKit())
     }
 
     @Export var inviteMessage: String {
@@ -56,11 +55,3 @@ class GKMatchRequest: RefCounted, @unchecked Sendable {
         set { request.inviteMessage = newValue }
     }
 }
-//
-// This is one part missing
-//extension RawArguments {
-//    func fetchArgument(at: Int) -> MatchType {
-//        let v: Int = fetchArgument(at: at)
-//        return MatchType(rawValue: v)!
-//    }
-//}

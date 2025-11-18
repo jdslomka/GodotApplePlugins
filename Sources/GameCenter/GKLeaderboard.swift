@@ -26,6 +26,7 @@ class GKLeaderboard: RefCounted, @unchecked Sendable {
 
     convenience init(board: GameKit.GKLeaderboard) {
         self.init()
+        self.board = board
     }
 
     @Export var title: String { board.title ?? "" }

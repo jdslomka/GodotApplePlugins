@@ -15,6 +15,7 @@ func _on_button_pressed() -> void:
 	var player = gameCenter.local_player
 	print("Got %s" % player)
 	print("Fetching the other object: %s" % player.is_authenticated)
+	
 	gameCenter.authentication_error.connect(func(error: String) -> void:
 		$auth_result.text = error
 		)
