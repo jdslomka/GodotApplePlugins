@@ -17,6 +17,18 @@ build:
 	swift build; \
 	for dest in $(DESTINATIONS); do \
 		suffix=`echo $$dest | sed 's,generic/platform=[a-zA-Z]*,,' | sed 's,platform=[a-zA-Z]*,,' | sed 's/,arch=//'`; \
+		platform_name=`echo $$dest | sed -n 's/.*platform=\([a-zA-Z0-9_]*\).*/\1/p'`; \
+		if [ -z "$$platform_name" ]; then \
+			platform_name="iOS"; \
+		fi; \
+		platform_lc=`echo $$platform_name | tr '[:upper:]' '[:lower:]'`; \
+		arch_name=`echo $$dest | sed -n 's/.*arch=\([a-zA-Z0-9_]*\).*/\1/p'`; \
+		if [ -z "$$arch_name" ] && [ "$$platform_lc" = "ios" ]; then \
+			arch_name="arm64"; \
+		fi; \
+		if [ -z "$$arch_name" ] && [ "$$platform_lc" = "macos" ]; then \
+			arch_name=`uname -m`; \
+		fi; \
 		echo HERE: $$suffix; \
 	    for framework in $(FRAMEWORK_NAMES); do \
 		$(XCODEBUILD) \
@@ -26,6 +38,16 @@ build:
 			-destination "$$dest" \
 			-derivedDataPath "$(DERIVED_DATA)$$suffix" \
 			build; \
+		if [ "$$platform_lc" = "ios" ] || [ "$$platform_lc" = "macos" ]; then \
+			$(CURDIR)/relink_without_swiftsyntax.sh \
+				--derived-data "$(DERIVED_DATA)$$suffix" \
+				--config "$(CONFIG)" \
+				--framework $$framework \
+				--platform $$platform_lc \
+				--arch $$arch_name; \
+		else \
+			echo "Skipping SwiftSyntax relink for $$framework on $$dest (unsupported platform)"; \
+		fi; \
 	    done;  \
 	done; \
 
