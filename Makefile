@@ -1,7 +1,7 @@
 PHONY: run xcframework
 
 # Allow overriding common build knobs.
-CONFIG ?= Debug
+CONFIG ?= Release
 DESTINATIONS ?= generic/platform=iOS platform=macOS,arch=arm64 platform=macOS,arch=x86_64
 DERIVED_DATA ?= $(CURDIR)/.xcodebuild
 WORKSPACE ?= .swiftpm/xcode/package.xcworkspace

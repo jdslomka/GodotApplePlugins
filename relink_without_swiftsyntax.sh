@@ -197,6 +197,7 @@ link_args=(
 	"-Xlinker" "-no_deduplicate"
 	"-fobjc-link-runtime"
 	"-Wl,-no_warn_duplicate_libraries"
+	"-Wl,-make_mergeable"
 	"-Xlinker" "-dead_strip"
 	"-o" "$tmp_binary"
 )
