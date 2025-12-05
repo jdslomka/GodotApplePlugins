@@ -18,6 +18,16 @@ switch to "Release Mode" and set "Create Merged Binary" to "Manual"
 and you will further reduce the size of your executable (about 1.7
 megs at the time of this writing.)
 
+# API Naming
+
+I kept the GameCenter APIs as close to possible to the Apple API names, as it can
+help people find documentatin, and they are already namespaced (for example, GKLeaderboard).   
+
+The StoreKit APIs on the other hand do not have a namespace, and they use names like
+"Product" and  "Transaction" which just seem much easier to conflict with Godot, so 
+those types are named "StoreProduct", "StoreTransaction". 
+
+
 # After you download
 
 Notice that MacOS will not let you load these dynamic libraries until you remove the 

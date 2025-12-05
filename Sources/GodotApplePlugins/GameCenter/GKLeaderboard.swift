@@ -196,6 +196,14 @@ class GKLeaderboard: RefCounted, @unchecked Sendable {
             self.processEntries(callback: callback, local: local, requested: requested, error: error)
         }
     }
+
+    @Callable
+    func load_local_player_entries(playerScope: GKLeaderboard.PlayerScope, timeScope: GKLeaderboard.TimeScope, rangeStart: Int, rangeLenght: Int, callback: Callable) {
+        let range = NSRange(location: rangeStart, length: rangeLenght)
+        board.loadEntries(for: playerScope.toGameKit(), timeScope: timeScope.toGameKit(), range: range) { localPlayerEntry, entries, totalPlayerCount, error in
+            self.processEntries(callback: callback, local: localPlayerEntry, requested: entries, range: totalPlayerCount, error: error)
+        }
+    }
 }
 
 @Godot
