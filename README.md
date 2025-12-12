@@ -4,8 +4,9 @@ Godot Plugins for deep Apple platform integration, works on MacOS and iOS.
 
 <p align="center">
 <strong>
-	[API Documentation](https://migueldeicaza.github.io/GodotApplePlugins/index.html) | Download: [Godot Asset Library](https://godotengine.org/asset-library/asset/4552) | Download from [GitHub Releases](https://github.com/migueldeicaza/GodotApplePlugins/releases)
+	<a href="https://migueldeicaza.github.io/GodotApplePlugins/index.html">API Documentation</a> | Download: <a href="https://godotengine.org/asset-library/asset/4552">Godot Asset Library</a>) | <a href="https://github.com/migueldeicaza/GodotApplePlugins/releases">GitHub Releases</a>
 </strong>
+</p>
 
 You can get a ready-to-use binary from the "releases" tab, just drag the contents  into 
 your addons directory.   You can start testing right away  on a Mac project, and for iOS, 
