@@ -51,6 +51,11 @@
 				[param error_message] contains error details if failed.
 			</description>
 		</signal>
+		<signal name="purchase_intent">
+			<param index="0" name="arg1" type="StoreProduct" />
+			<description>
+			</description>
+		</signal>
 		<signal name="restore_completed">
 			<param index="0" name="status" type="int" />
 			<param index="1" name="error_message" type="String" />

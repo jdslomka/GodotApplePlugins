@@ -2,6 +2,10 @@
 
 Godot Plugins for deep Apple platform integration, works on MacOS and iOS.
 
+<p align="center">
+<strong>
+	[API Documentation](https://migueldeicaza.github.io/GodotApplePlugins/index.html) | Download: [Godot Asset Library](https://godotengine.org/asset-library/asset/4552) | Download from [GitHub Releases](https://github.com/migueldeicaza/GodotApplePlugins/releases)
+</strong>
 
 You can get a ready-to-use binary from the "releases" tab, just drag the contents  into 
 your addons directory.   You can start testing right away  on a Mac project, and for iOS, 
@@ -9,9 +13,9 @@ export your iOS project and run.
 
 This add-on currently includes comprehensive support for:
 
-* GameCenter [API Docs](https://migueldeicaza.github.io/GodotApplePlugins/class_gamecentermanager.html)[GameCenter Integration Guide](Sources/GodotApplePlugins/GameCenter/GameCenterGuide.md)
-* StoreKit2 [API Docs](https://migueldeicaza.github.io/GodotApplePlugins/class_storekitmanager.html)
-* AuthenticationServices ("sign-in with Apple")
+* GameCenter [GameCenter Integration Guide](Sources/GodotApplePlugins/GameCenter/GameCenterGuide.md)
+* StoreKit2 (https://migueldeicaza.github.io/GodotApplePlugins/class_storekitmanager.html)
+* Sign-in with Apple (AuthenticationServices)
 
 The release contains both binaries for MacOS as dynamic libraries and
 an iOS xcframework compiled with the "Mergeable Library" feature.

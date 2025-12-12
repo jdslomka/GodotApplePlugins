@@ -67,7 +67,9 @@ jobs:
       - name: Archive addons directory
         run: |
           PACKAGE_NAME="GodotApplePlugins-addons-${GITHUB_SHA}.zip"
-          zip -r "$PACKAGE_NAME" addons
+          mkdir dist
+          mv addons dist
+          zip -r "$PACKAGE_NAME" dist
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> "$GITHUB_ENV"
 
       - name: Publish release
