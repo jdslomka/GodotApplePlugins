@@ -17,6 +17,7 @@ This add-on currently includes comprehensive support for:
 * GameCenter [GameCenter Integration Guide](Sources/GodotApplePlugins/GameCenter/GameCenterGuide.md)
 * StoreKit2 (https://migueldeicaza.github.io/GodotApplePlugins/class_storekitmanager.html)
 * Sign-in with Apple (AuthenticationServices)
+* AppleFilePicker: allow your application to invoke the file system picker.
 
 The release contains both binaries for MacOS as dynamic libraries and
 an iOS xcframework compiled with the "Mergeable Library" feature.
