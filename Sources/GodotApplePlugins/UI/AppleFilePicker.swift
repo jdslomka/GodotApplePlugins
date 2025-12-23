@@ -14,6 +14,14 @@ import AppKit
 #endif
 import UniformTypeIdentifiers
 
+@Godot(.tool)
+class DatabaseEditorWindow: Window
+{
+
+    @Export(.nodeType, "TabContainer") var editorTabs: TabContainer? = nil
+    @Export(.nodeType, "Container") var databaseDetailsContainer: Container? = nil
+
+}
 @Godot
 public class AppleFilePicker: RefCounted, @unchecked Sendable {
     // AppleURL, path
@@ -45,14 +53,14 @@ public class AppleFilePicker: RefCounted, @unchecked Sendable {
             }
             
             if allowMultiple {
-                let appleUrls = TypedArray<AppleURL>()
+                let appleUrls = TypedArray<AppleURL?>()
                 let paths = PackedStringArray()
                 
                 for url in urls {
                     let appleURL = AppleURL()
                     appleURL.url = url
                     appleUrls.append(appleURL)
-                    paths.append(value: url.path)
+                    paths.append(url.path)
                 }
                 parent?.files_selected.emit(appleUrls, paths)
             } else {
