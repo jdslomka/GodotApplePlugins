@@ -72,10 +72,10 @@ public class AppleFilePicker: RefCounted, @unchecked Sendable {
 #endif
     
     @Callable
-    func pick_document(allowedTypes: [String], allowMultiple: Bool = false) {
+    func pick_document(allowed_types: [String], allow_multiple: Bool = false) {
         // Convert string extensions/types to UTTypes
         var utTypes: [UTType] = []
-        for ext in allowedTypes {
+        for ext in allowed_types {
             if let type = UTType(filenameExtension: ext) {
                 utTypes.append(type)
             } else if let type = UTType(ext) {
@@ -90,32 +90,32 @@ public class AppleFilePicker: RefCounted, @unchecked Sendable {
         
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.showPicker(types: utTypes, allowMultiple: allowMultiple)
+            self.showPicker(types: utTypes, allow_multiple: allow_multiple)
         }
     }
     
     @MainActor
-    private func showPicker(types: [UTType], allowMultiple: Bool) {
+    private func showPicker(types: [UTType], allow_multiple: Bool) {
 #if os(iOS)
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: types, asCopy: false)
-        let delegate = PickerDelegate(self, allowMultiple: allowMultiple)
+        let delegate = PickerDelegate(self, allowMultiple: allow_multiple)
         self.delegate = delegate
         picker.delegate = delegate
-        picker.allowsMultipleSelection = allowMultiple
+        picker.allowsMultipleSelection = allow_multiple
         
         presentOnTop(picker)
         
 #elseif os(macOS)
         let panel = NSOpenPanel()
         panel.allowedContentTypes = types
-        panel.allowsMultipleSelection = allowMultiple
+        panel.allowsMultipleSelection = allow_multiple
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         
         let handler: (NSApplication.ModalResponse) -> Void = { [weak self] response in
             guard let self = self else { return }
             if response == .OK {
-                if allowMultiple {
+                if allow_multiple {
                     let appleUrls = TypedArray<AppleURL?>()
                     let paths = PackedStringArray()
 

@@ -15,8 +15,8 @@
 	<methods>
 		<method name="pick_document">
 			<return type="void" />
-			<param index="0" name="allowedTypes" type="Array[String]" />
-			<param index="1" name="allowMultiple" type="bool" />
+			<param index="0" name="allowed_types" type="Array[String]" />
+			<param index="1" name="allow_multiple" type="bool" />
 			<description>
 				Opens the file picker. 
 				                [param allowed_types] should be an array of strings representing the file extensions or UTTypes you want to allow (e.g. `["txt", "png"]` or `["public.plain-text"]`).
