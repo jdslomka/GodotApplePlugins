@@ -5,15 +5,17 @@
 //  Created by Miguel de Icaza on 11/21/25.
 //
 
-@preconcurrency import SwiftGodotRuntime
 import StoreKit
+@preconcurrency import SwiftGodotRuntime
 
 @Godot
 public class StoreKitManager: RefCounted, @unchecked Sendable {
     // [StoreProduct], StoreKitStatus
-    @Signal("products", "status") var products_request_completed: SignalWithArguments<TypedArray<StoreProduct?>, Int>
+    @Signal("products", "status") var products_request_completed:
+        SignalWithArguments<TypedArray<StoreProduct?>, Int>
     // StoreTransaction, StoreKitStatus, error message
-    @Signal("transaction", "status", "message") var purchase_completed: SignalWithArguments<StoreTransaction?, Int, String>
+    @Signal("transaction", "status", "message") var purchase_completed:
+        SignalWithArguments<StoreTransaction?, Int, String>
     // StoreTransaction
     @Signal("transaction") var transaction_updated: SignalWithArguments<StoreTransaction?>
     // StoreProduct
@@ -23,13 +25,13 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
     @Signal("status", "message") var restore_completed: SignalWithArguments<Int, String>
 
     // This is only raised for verified results
-    @Signal("status") var supscription_update: SignalWithArguments<StoreSubscriptionInfoStatus?>
+    @Signal("status") var subscription_update: SignalWithArguments<StoreSubscriptionInfoStatus?>
 
     public enum StoreKitStatus: Int, CaseIterable {
         case OK
         /// Invalid product, the StoreProduct does not contains a valid product
         case INVALID_PRODUCT
-        /// The oepration was canceled
+        /// The operation was canceled
         case CANCELLED
 
         case UNVERIFIED_TRANSACTION
@@ -48,7 +50,7 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
         super.init(context)
         GD.print("Remember that you have now to connect your signals and call 'start'")
     }
-    
+
     deinit {
         updatesTask?.cancel()
         intentsTask?.cancel()
@@ -84,14 +86,15 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
         subscriptionTask = Task {
             for await status in Product.SubscriptionInfo.Status.updates {
                 guard case .verified(_) = status.transaction,
-                      case .verified(_) = status.renewalInfo else {
+                    case .verified(_) = status.renewalInfo
+                else {
                     // TODO: should raise an event here, just like the updateTask does
                     GD.print("Unverified transaction")
                     continue
                 }
                 Task { @MainActor in
                     Task { @MainActor in
-                        self.supscription_update.emit(StoreSubscriptionInfoStatus(status))
+                        self.subscription_update.emit(StoreSubscriptionInfoStatus(status))
                     }
                 }
             }
@@ -101,18 +104,18 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
     private func startPurchaseIntentListener() {
         if #available(iOS 17.4, macOS 14.4, *) {
             intentsTask = Task {
-                 for await intent in PurchaseIntent.intents {
-                     let storeProduct = StoreProduct(intent.product)
-                     await MainActor.run {
-                         GD.print("Posting purchase_intent")
+                for await intent in PurchaseIntent.intents {
+                    let storeProduct = StoreProduct(intent.product)
+                    await MainActor.run {
+                        GD.print("Posting purchase_intent")
 
-                         _ = self.purchase_intent.emit(storeProduct)
-                     }
-                 }
-             }
+                        _ = self.purchase_intent.emit(storeProduct)
+                    }
+                }
+            }
         }
-     }
-    
+    }
+
     private func handleTransaction(_ verificationResult: VerificationResult<Transaction>) {
         switch verificationResult {
         case .verified(let transaction):
@@ -124,7 +127,7 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
             Task {
                 await transaction.finish()
             }
-            
+
             // Emit signal on main thread
             Task { @MainActor in
                 GD.print("Posting transaction_updated")
@@ -153,7 +156,8 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
                 }
                 _ = self.products_request_completed.emit(variantArray, StoreKitStatus.OK.rawValue)
             } catch {
-                _ = self.products_request_completed.emit(TypedArray<StoreProduct?>(), StoreKitStatus.CANCELLED.rawValue)
+                _ = self.products_request_completed.emit(
+                    TypedArray<StoreProduct?>(), StoreKitStatus.CANCELLED.rawValue)
             }
         }
     }
@@ -164,9 +168,12 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
     }
 
     @Callable
-    func purchase_with_options(product: StoreProduct, options: TypedArray<StoreProductPurchaseOption?>) {
+    func purchase_with_options(
+        product: StoreProduct, options: TypedArray<StoreProductPurchaseOption?>
+    ) {
         guard let skProduct = product.product else {
-            self.purchase_completed.emit(nil, StoreKitStatus.INVALID_PRODUCT.rawValue, "Invalid Product")
+            self.purchase_completed.emit(
+                nil, StoreKitStatus.INVALID_PRODUCT.rawValue, "Invalid Product")
             return
         }
 
@@ -186,34 +193,41 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
                         let storeTransaction = StoreTransaction(transaction)
                         await transaction.finish()
                         await MainActor.run {
-                            _ = self.purchase_completed.emit(storeTransaction, StoreKitStatus.OK.rawValue, "")
+                            _ = self.purchase_completed.emit(
+                                storeTransaction, StoreKitStatus.OK.rawValue, "")
                         }
                     case .unverified(_, let error):
                         await MainActor.run {
-                            _ = self.purchase_completed.emit(nil, StoreKitStatus.UNVERIFIED_TRANSACTION.rawValue, "Unverified transaction: \(error.localizedDescription)")
+                            _ = self.purchase_completed.emit(
+                                nil, StoreKitStatus.UNVERIFIED_TRANSACTION.rawValue,
+                                "Unverified transaction: \(error.localizedDescription)")
                         }
                     }
                 case .userCancelled:
                     await MainActor.run {
-                        _ = self.purchase_completed.emit(nil, StoreKitStatus.USER_CANCELLED.rawValue, "User cancelled")
+                        _ = self.purchase_completed.emit(
+                            nil, StoreKitStatus.USER_CANCELLED.rawValue, "User cancelled")
                     }
                 case .pending:
                     await MainActor.run {
-                        _ = self.purchase_completed.emit(nil, StoreKitStatus.PURCHASE_PENDING.rawValue, "Purchase pending")
+                        _ = self.purchase_completed.emit(
+                            nil, StoreKitStatus.PURCHASE_PENDING.rawValue, "Purchase pending")
                     }
                 @unknown default:
                     await MainActor.run {
-                        _ = self.purchase_completed.emit(nil, StoreKitStatus.UNKNOWN_STATUS.rawValue, "Unknown purchase result")
+                        _ = self.purchase_completed.emit(
+                            nil, StoreKitStatus.UNKNOWN_STATUS.rawValue, "Unknown purchase result")
                     }
                 }
             } catch {
                 await MainActor.run {
-                    _ = self.purchase_completed.emit(nil, StoreKitStatus.CANCELLED.rawValue, error.localizedDescription)
+                    _ = self.purchase_completed.emit(
+                        nil, StoreKitStatus.CANCELLED.rawValue, error.localizedDescription)
                 }
             }
         }
     }
-    
+
     @Callable
     func restore_purchases() {
         Task {
@@ -224,7 +238,19 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
                 }
             } catch {
                 await MainActor.run {
-                    _ = self.restore_completed.emit(StoreKitStatus.CANCELLED.rawValue, error.localizedDescription)
+                    _ = self.restore_completed.emit(
+                        StoreKitStatus.CANCELLED.rawValue, error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    @Callable
+    func refresh_purchased_products() {
+        Task {
+            for await verificationResult in Transaction.currentEntitlements {
+                await MainActor.run {
+                    handleTransaction(verificationResult)
                 }
             }
         }
