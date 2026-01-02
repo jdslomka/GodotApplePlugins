@@ -30,14 +30,13 @@
 			<description>
 				The current entitlements sequence provides the most recent transaction for each product the customer is entitled to, use this
 				to refresh the list of features the user is entitled to.
-				
+
 				Specifically, it includes:
 
-	* One transaction for each non-consumable In-App Purchase
-	* The latest transaction for each auto-renewable subscription whose Product.SubscriptionInfo.RenewalState is either subscribed or inGracePeriod
-	* The latest transaction for each non-renewing subscription, including those that have ended
-	* Products that have been refunded or revoked by the App Store are excluded from the current entitlements, as are consumable In-App Purchases. To retrieve transactions for unfinished consumables, use the unfinished or all transaction sequences instead.
-
+				* One transaction for each non-consumable In-App Purchase
+				* The latest transaction for each auto-renewable subscription whose Product.SubscriptionInfo.RenewalState is either subscribed or inGracePeriod
+				* The latest transaction for each non-renewing subscription, including those that have ended
+				* Products that have been refunded or revoked by the App Store are excluded from the current entitlements, as are consumable In-App Purchases. To retrieve transactions for unfinished consumables, use the unfinished or all transaction sequences instead.
 			</description>
 		</method>
 		<method name="purchase">
@@ -117,7 +116,9 @@
 		<signal name="transaction_updated">
 			<param index="0" name="transaction" type="StoreTransaction" />
 			<description>
-				Emitted when a transaction is updated (e.g., a subscription renews or a purchase is approved externally). `arg1` is the updated [StoreTransaction].
+				Emitted when a transaction is updated (e.g., a subscription renews or a purchase is approved externally). `transaction` is the updated [StoreTransaction].
+
+				You must call the finished method on the transaction once you have made sure that you have delivered the content to the user.
 			</description>
 		</signal>
 		<signal name="unverified_transaction_updated">
@@ -150,25 +151,25 @@
 			An unknown status occurred.
 		</constant>
 		<constant name="REVOKED_CERTIFICATE" value="0" enum="VerificationError">
-		The certificate chain was parsable, but was invalid due to one or more revoked certificates.
+			The certificate chain was parsable, but was invalid due to one or more revoked certificates.
 		</constant>
 		<constant name="INVALID_CERTIFICATE_CHAIN" value="1" enum="VerificationError">
-		The certificate chain was parsable, but it was invalid for signing this data.
+			The certificate chain was parsable, but it was invalid for signing this data.
 		</constant>
 		<constant name="INVALID_DEVICE_VERIFICATION" value="2" enum="VerificationError">
-		The device verification properties were invalid for this device.
+			The device verification properties were invalid for this device.
 		</constant>
 		<constant name="INVALID_ENCODING" value="3" enum="VerificationError">
-		Th JWS header and any data included in it or it's certificate chain had an invalid encoding.
+			Th JWS header and any data included in it or it's certificate chain had an invalid encoding.
 		</constant>
 		<constant name="INVALID_SIGNATURE" value="4" enum="VerificationError">
-		The certificate chain was valid for signing this data, but the leaf's public key was invalid for the JWS signature.
+			The certificate chain was valid for signing this data, but the leaf's public key was invalid for the JWS signature.
 		</constant>
 		<constant name="MISSING_REQUIRED_PROPERTIES" value="5" enum="VerificationError">
-		Either the JWS header or any certificate in the chain was missing necessary properties for verification.
+			Either the JWS header or any certificate in the chain was missing necessary properties for verification.
 		</constant>
 		<constant name="OTHER" value="6" enum="VerificationError">
-		A new error code was introduced that was not previously handled.
+			A new error code was introduced that was not previously handled.
 		</constant>
 	</constants>
 </class>

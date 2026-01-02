@@ -48,7 +48,6 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
 
     required init(_ context: InitContext) {
         super.init(context)
-        GD.print("Remember that you have now to connect your signals and call 'start'")
     }
     
     deinit {
@@ -88,7 +87,7 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
                 guard case .verified(_) = status.transaction,
                       case .verified(_) = status.renewalInfo else {
                     // TODO: should raise an event here, just like the updateTask does
-                    GD.print("Unverified transaction")
+                    GD.print("Unverified transaction or renewalInfo")
                     continue
                 }
                 Task { @MainActor in
@@ -106,7 +105,6 @@ public class StoreKitManager: RefCounted, @unchecked Sendable {
                  for await intent in PurchaseIntent.intents {
                      let storeProduct = StoreProduct(intent.product)
                      await MainActor.run {
-                         GD.print("Posting purchase_intent")
 
                          _ = self.purchase_intent.emit(storeProduct)
                      }
