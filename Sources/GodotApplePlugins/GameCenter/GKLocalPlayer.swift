@@ -18,6 +18,44 @@ import GameKit
 @Godot
 class GKLocalPlayer: GKPlayer, @unchecked Sendable {
     var local: GameKit.GKLocalPlayer
+    private var proxy: Proxy?
+
+    class Proxy: NSObject, GKLocalPlayerListener {
+        weak var base: GKLocalPlayer?
+
+        init(base: GKLocalPlayer) {
+            self.base = base
+        }
+
+        func player(_ player: GameKit.GKPlayer, hasConflictingSavedGames savedGames: [GameKit.GKSavedGame]) {
+            guard let base = base else { return }
+            let array = VariantArray()
+            savedGames.forEach { array.append(Variant(GKSavedGame(saved: $0))) }
+            let gkPlayer = GKPlayer(player: player)
+            Task { @MainActor in
+                base.conflicting_saved_games.emit(gkPlayer, array)
+            }
+        }
+
+        func player(_ player: GameKit.GKPlayer, didModifySavedGame savedGame: GameKit.GKSavedGame) {
+            guard let base = base else { return }
+            let gkPlayer = GKPlayer(player: player)
+            let gkSavedGame = GKSavedGame(saved: savedGame)
+            Task { @MainActor in
+                base.saved_game_modified.emit(gkPlayer, gkSavedGame)
+            }
+        }
+    }
+
+    /// Emitted when there is a conflict between saved games.
+    /// The `player` argument is the GKPlayer wrapper.
+    /// The `conflicting_saved_games` argument is a VariantArray of GKSavedGame objects.
+    @Signal("player", "conflicting_saved_games") var conflicting_saved_games: SignalWithArguments<GKPlayer, VariantArray>
+
+    /// Emitted when a saved game is modified.
+    /// The `player` argument is the GKPlayer wrapper.
+    /// The `saved_game` argument is the GKSavedGame wrapper.
+    @Signal("player", "saved_game") var saved_game_modified: SignalWithArguments<GKPlayer, GKSavedGame>
 
     required init(_ context: InitContext) {
         local = GameKit.GKLocalPlayer.local
@@ -130,6 +168,46 @@ class GKLocalPlayer: GKPlayer, @unchecked Sendable {
     func delete_saved_games(named: String, callback: Callable) {
         local.deleteSavedGames(withName: named) { error in
             _ = callback.call(mapError(nil))
+        }
+    }
+
+    @Callable
+    func register_listener() {
+        if proxy == nil {
+            proxy = Proxy(base: self)
+        }
+        if let proxy = proxy {
+            local.register(proxy)
+        }
+    }
+
+    @Callable
+    func unregister_listener() {
+        if let proxy = proxy {
+            local.unregisterListener(proxy)
+        }
+    }
+
+    /// Resolves conflicting saved games using the provided data.
+    /// - Parameters:
+    ///   - conflicts: An array of GKSavedGame objects that are in conflict.
+    ///   - data: The correct game data to save.
+    ///   - callback: A function to call when resolution is complete.
+    @Callable
+    func resolve_conflicting_saved_games(
+        conflicts: TypedArray<GKSavedGame?>, data: PackedByteArray, callback: Callable
+    ) {
+        guard let data = data.asData() else {
+            _ = callback.call(nil, Variant(String("Could not convert the packed array to Data")))
+            return
+        }
+
+        let conflictList = conflicts.compactMap { $0?.saved }
+
+        local.resolveConflictingSavedGames(conflictList, with: data) { savedGames, error in
+            let ret = TypedArray<GKSavedGame?>()
+            savedGames?.forEach { ret.append(GKSavedGame(saved: $0)) }
+            _ = callback.call(Variant(ret), mapError(error))
         }
     }
 }

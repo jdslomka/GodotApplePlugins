@@ -54,6 +54,22 @@
 	</description>
 	<tutorials>
 	</tutorials>
+	   <signals>
+	       <signal name="conflicting_saved_games">
+	           <param index="0" name="player" type="GKPlayer" />
+	           <param index="1" name="conflicting_saved_games" type="Array" />
+	           <description>
+	               Emitted when there is a conflict between saved games. You should listen to this signal and then call [method resolve_conflicting_saved_games] with the chosen data.
+	           </description>
+	       </signal>
+	       <signal name="saved_game_modified">
+	           <param index="0" name="player" type="GKPlayer" />
+	           <param index="1" name="saved_game" type="GKSavedGame" />
+	           <description>
+	               Emitted when a saved game is modified.
+	           </description>
+	       </signal>
+	   </signals>
 	<methods>
 		<method name="delete_saved_games">
 			<return type="void" />
@@ -111,6 +127,27 @@
 				                and on error, the second parameter is not-nil and contains the error message.
 			</description>
 		</method>
+		      <method name="register_listener">
+		          <return type="void" />
+		          <description>
+		              Registers the local player listener to receive events like saved game conflicts. You typically call this in your [code]_ready()[/code] function.
+		          </description>
+		      </method>
+		      <method name="unregister_listener">
+		          <return type="void" />
+		          <description>
+		              Unregisters the local player listener.
+		          </description>
+		      </method>
+		      <method name="resolve_conflicting_saved_games">
+		          <return type="void" />
+		          <param index="0" name="conflicts" type="Array" />
+		          <param index="1" name="data" type="PackedByteArray" />
+		          <param index="2" name="callback" type="Callable" />
+		          <description>
+		              Resolves conflicting saved games using the provided data. The [code]conflicts[/code] array should contain the [GKSavedGame] objects that are in conflict (received from the [signal conflicting_saved_games]). The [code]data[/code] is the correct game data to save. The callback receives [code](Array[GKSavedGame] saved_games, Variant error)[/code].
+		          </description>
+		      </method>
 	</methods>
 	<members>
 		<member name="is_authenticated" type="bool" setter="" getter="get_is_authenticated" default="false">
