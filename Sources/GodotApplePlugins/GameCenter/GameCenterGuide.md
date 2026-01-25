@@ -157,6 +157,62 @@ local_player.fetch_items_for_identity_verification_signature(func(values: Dictio
 )
 ```
 
+# Saved Games
+
+## Handling Conflicts
+
+When multiple devices save games with the same name, conflicts can occur. You can handle these conflicts by registering a listener and implementing the resolution logic.
+
+```gdscript
+var game_center: GameCenterManager
+var local: GKLocalPlayer
+
+func _ready() -> void:
+    game_center = GameCenterManager.new()
+    local = game_center.local_player
+    
+    # Register the listener to receive conflict signals
+    local.register_listener()
+    
+    local.conflicting_saved_games.connect(_on_conflicting_saved_games)
+
+func _on_conflicting_saved_games(player: GKPlayer, conflicts: Array) -> void:
+    print("Received conflict for player: %s" % player.alias)
+    
+    # Logic to determine which data to keep (e.g., newest, highest score, or user choice)
+    # For this example, we assume we want to keep the data from the first conflicting save.
+    
+    var chosen_save = conflicts[0] as GKSavedGame
+    
+    chosen_save.load_data(func(data: PackedByteArray, error: Variant) -> void:
+        if error:
+            print("Error loading data: %s" % error)
+            return
+            
+        # Resolve the conflict using the chosen data
+        local.resolve_conflicting_saved_games(conflicts, data, func(saved_games: Array[GKSavedGame], error: Variant) -> void:
+            if error:
+                print("Error resolving conflict: %s" % error)
+            else:
+                print("Conflict resolved!")
+        )
+    )
+```
+
+## Saved Game Modifications
+
+You can also listen for modifications to saved games (e.g., from other devices).
+
+```gdscript
+func _ready() -> void:
+    # ... setup local player ...
+    local.saved_game_modified.connect(_on_saved_game_modified)
+
+func _on_saved_game_modified(player: GKPlayer, saved_game: GKSavedGame) -> void:
+    print("Saved game modified: %s" % saved_game.name)
+    # Reload data or update UI
+```
+
 # Achievements
 
 * [GKAchievement](https://developer.apple.com/documentation/gamekit/gkachievement)
