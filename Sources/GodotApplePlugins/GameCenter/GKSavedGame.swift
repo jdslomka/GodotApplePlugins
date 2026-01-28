@@ -31,6 +31,10 @@ class GKSavedGame: GKPlayer, @unchecked Sendable {
         saved?.deviceName ?? ""
     }
 
+    @Export var modificationDate: Double {
+        saved?.modificationDate?.timeIntervalSince1970 ?? 0
+    }
+
     @Callable
     func load_data(done: Callable) {
         guard let saved else {
