@@ -122,7 +122,8 @@ class GKMatchmakerViewController: RefCounted, @unchecked Sendable {
                 dialogController?.dismiss(source)
 
 #endif
-                _ = self.callback.call(nil, Variant("cancelled"))
+                let error = NSError(domain: GKErrorDomain, code: GKError.Code.cancelled.rawValue, userInfo: [NSLocalizedDescriptionKey: "Cancelled"])
+                _ = self.callback.call(nil, mapGKError(error))
                 done()
             }
         }
@@ -131,7 +132,7 @@ class GKMatchmakerViewController: RefCounted, @unchecked Sendable {
             _ source: GameKit.GKMatchmakerViewController,
             didFailWithError: (any Error)
         ) {
-            _ = self.callback.call(nil, Variant(didFailWithError.localizedDescription))
+            _ = self.callback.call(nil, mapGKError(didFailWithError))
             done()
         }
     }
