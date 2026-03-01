@@ -2,7 +2,8 @@
 
 # Allow overriding common build knobs.
 CONFIG ?= Release
-DESTINATIONS ?= generic/platform=iOS platform=macOS,arch=arm64 platform=macOS,arch=x86_64
+HOST_ARCH ?= $(shell uname -m)
+DESTINATIONS ?= generic/platform=iOS generic/platform=iOS\ Simulator platform=macOS,arch=arm64 platform=macOS,arch=x86_64
 DERIVED_DATA ?= $(CURDIR)/.xcodebuild
 WORKSPACE ?= .swiftpm/xcode/package.xcworkspace
 SCHEME ?= GodotApplePlugins
@@ -16,38 +17,47 @@ build:
 	set -e; \
 	swift build; \
 	for dest in $(DESTINATIONS); do \
-		suffix=`echo $$dest | sed 's,generic/platform=[a-zA-Z]*,,' | sed 's,platform=[a-zA-Z]*,,' | sed 's/,arch=//'`; \
-		platform_name=`echo $$dest | sed -n 's/.*platform=\([a-zA-Z0-9_]*\).*/\1/p'`; \
+		platform_name=`echo "$$dest" | sed -n 's/.*platform=\([^,]*\).*/\1/p'`; \
 		if [ -z "$$platform_name" ]; then \
 			platform_name="iOS"; \
 		fi; \
-		platform_lc=`echo $$platform_name | tr '[:upper:]' '[:lower:]'`; \
+		platform_lc=`echo "$$platform_name" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]'`; \
 		arch_name=`echo $$dest | sed -n 's/.*arch=\([a-zA-Z0-9_]*\).*/\1/p'`; \
+		suffix=""; \
 		if [ -z "$$arch_name" ] && [ "$$platform_lc" = "ios" ]; then \
 			arch_name="arm64"; \
+		fi; \
+		if [ -z "$$arch_name" ] && [ "$$platform_lc" = "iossimulator" ]; then \
+			arch_name="$(HOST_ARCH)"; \
 		fi; \
 		if [ -z "$$arch_name" ] && [ "$$platform_lc" = "macos" ]; then \
 			arch_name=`uname -m`; \
 		fi; \
-		echo HERE: $$suffix; \
-	    for framework in $(FRAMEWORK_NAMES); do \
-		$(XCODEBUILD) \
-			-workspace '$(WORKSPACE)' \
-			-scheme $$framework \
-			-configuration '$(CONFIG)' \
-			-destination "$$dest" \
-			-derivedDataPath "$(DERIVED_DATA)$$suffix" \
-			build; \
-		if [ "$$platform_lc" = "ios" ] || [ "$$platform_lc" = "macos" ]; then \
-			$(CURDIR)/relink_without_swiftsyntax.sh \
-				--derived-data "$(DERIVED_DATA)$$suffix" \
-				--config "$(CONFIG)" \
-				--framework $$framework \
-				--platform $$platform_lc \
-				--arch $$arch_name; \
-		else \
-			echo "Skipping SwiftSyntax relink for $$framework on $$dest (unsupported platform)"; \
+		if [ "$$platform_lc" = "iossimulator" ]; then \
+			suffix="simulator"; \
 		fi; \
+		if [ "$$platform_lc" = "macos" ]; then \
+			suffix="$$arch_name"; \
+		fi; \
+	    for framework in $(FRAMEWORK_NAMES); do \
+			$(XCODEBUILD) \
+				-workspace '$(WORKSPACE)' \
+				-scheme $$framework \
+				-configuration '$(CONFIG)' \
+				-destination "$$dest" \
+				-derivedDataPath "$(DERIVED_DATA)$$suffix" \
+				build; \
+			if [ "$$platform_lc" = "ios" ] || [ "$$platform_lc" = "macos" ]; then \
+				relink_platform="$$platform_lc"; \
+				$(CURDIR)/relink_without_swiftsyntax.sh \
+					--derived-data "$(DERIVED_DATA)$$suffix" \
+					--config "$(CONFIG)" \
+					--framework $$framework \
+					--platform $$relink_platform \
+					--arch $$arch_name; \
+			else \
+				echo "Skipping SwiftSyntax relink for $$framework on $$dest (unsupported platform)"; \
+			fi; \
 	    done;  \
 	done; \
 
@@ -83,6 +93,7 @@ dist:
 		rm -rf $(CURDIR)/addons/$$framework/bin/$$framework*.framework; \
 		$(XCODEBUILD) -create-xcframework \
 			-framework $(DERIVED_DATA)/Build/Products/$(CONFIG)-iphoneos/PackageFrameworks/$$framework.framework \
+			-framework $(DERIVED_DATA)simulator/Build/Products/$(CONFIG)-iphonesimulator/PackageFrameworks/$$framework.framework \
 			-output $(CURDIR)/addons/$$framework/bin/$${framework}.xcframework; \
 		rsync -a $(DERIVED_DATA)x86_64/Build/Products/$(CONFIG)/PackageFrameworks/$${framework}.framework/ $(CURDIR)/addons/$$framework/bin/$${framework}_x64.framework; \
 		rsync -a $(DERIVED_DATA)arm64/Build/Products/$(CONFIG)/PackageFrameworks/$${framework}.framework/ $(CURDIR)/addons/$$framework/bin/$${framework}.framework; \
