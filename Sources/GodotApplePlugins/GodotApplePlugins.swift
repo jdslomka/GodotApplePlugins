@@ -24,7 +24,9 @@ import SwiftGodotRuntime
         GKLeaderboard.self,
         GKLeaderboardEntry.self,
         GKLeaderboardSet.self,
+        GKInvite.self,
         GKMatch.self,
+        GKMatchmaker.self,
         GKMatchmakerViewController.self,
         GKMatchRequest.self,
         GKPlayer.self,
@@ -67,6 +69,7 @@ import SwiftGodotRuntime
         GKLeaderboard.PlayerScope.self,
         GKMatch.SendDataMode.self,
         GKMatchRequest.MatchType.self,
+        GKMatchRequest.InviteRecipientResponse.self,
         GKError.Code.self,
 
         ProductView.ViewStyle.self,

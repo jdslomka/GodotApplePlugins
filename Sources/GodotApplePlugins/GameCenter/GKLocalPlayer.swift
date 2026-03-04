@@ -47,6 +47,15 @@ class GKLocalPlayer: GKPlayer, @unchecked Sendable {
                 base.saved_game_modified.emit(gkPlayer, gkSavedGame)
             }
         }
+
+        func player(_ player: GameKit.GKPlayer, didAccept invite: GameKit.GKInvite) {
+            guard let base = base else { return }
+            let gkPlayer = GKPlayer(player: player)
+            let gkInvite = GKInvite(invite: invite)
+            Task { @MainActor in
+                base.invite_accepted.emit(gkPlayer, gkInvite)
+            }
+        }
     }
 
     /// Emitted when there is a conflict between saved games.
@@ -60,6 +69,12 @@ class GKLocalPlayer: GKPlayer, @unchecked Sendable {
     /// The `saved_game` argument is the GKSavedGame wrapper.
     @Signal("player", "saved_game") var saved_game_modified:
         SignalWithArguments<GKPlayer, GKSavedGame>
+
+    /// Emitted when the local player accepts a Game Center invite.
+    /// The `player` argument is the GKPlayer wrapper for the local player.
+    /// The `invite` argument is the GKInvite wrapper.
+    @Signal("player", "invite") var invite_accepted:
+        SignalWithArguments<GKPlayer, GKInvite>
 
     required init(_ context: InitContext) {
         local = GameKit.GKLocalPlayer.local
