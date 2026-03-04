@@ -141,6 +141,52 @@ class GKLocalPlayer: GKPlayer, @unchecked Sendable {
                 base.player_wants_to_quit_match.emit(gkPlayer, gkMatch)
             }
         }
+
+        func player(_ player: GameKit.GKPlayer, didReceive challenge: GameKit.GKChallenge) {
+            guard let base = base else { return }
+            let gkPlayer = GKPlayer(player: player)
+            let gkChallenge = GKChallenge.wrap(challenge)
+            Task { @MainActor in
+                base.challenge_received.emit(gkPlayer, gkChallenge)
+            }
+        }
+
+        func player(_ player: GameKit.GKPlayer, wantsToPlay challenge: GameKit.GKChallenge) {
+            guard let base = base else { return }
+            let gkPlayer = GKPlayer(player: player)
+            let gkChallenge = GKChallenge.wrap(challenge)
+            Task { @MainActor in
+                base.challenge_other_player_accepted.emit(gkPlayer, gkChallenge)
+            }
+        }
+
+        func player(
+            _ player: GameKit.GKPlayer,
+            didComplete challenge: GameKit.GKChallenge,
+            issuedByFriend friendPlayer: GameKit.GKPlayer
+        ) {
+            guard let base = base else { return }
+            let gkPlayer = GKPlayer(player: player)
+            let gkChallenge = GKChallenge.wrap(challenge)
+            let gkFriendPlayer = GKPlayer(player: friendPlayer)
+            Task { @MainActor in
+                base.challenge_completed.emit(gkPlayer, gkChallenge, gkFriendPlayer)
+            }
+        }
+
+        func player(
+            _ player: GameKit.GKPlayer,
+            issuedChallengeWasCompleted challenge: GameKit.GKChallenge,
+            byFriend friendPlayer: GameKit.GKPlayer
+        ) {
+            guard let base = base else { return }
+            let gkPlayer = GKPlayer(player: player)
+            let gkChallenge = GKChallenge.wrap(challenge)
+            let gkFriendPlayer = GKPlayer(player: friendPlayer)
+            Task { @MainActor in
+                base.challenge_other_player_completed.emit(gkPlayer, gkChallenge, gkFriendPlayer)
+            }
+        }
     }
 
     /// Emitted when there is a conflict between saved games.
@@ -188,6 +234,22 @@ class GKLocalPlayer: GKPlayer, @unchecked Sendable {
     /// Emitted when the local player wants to quit a turn-based match.
     @Signal("player", "match") var player_wants_to_quit_match:
         SignalWithArguments<GKPlayer, GKTurnBasedMatch>
+
+    /// Emitted when the local player receives a challenge.
+    @Signal("player", "challenge") var challenge_received:
+        SignalWithArguments<GKPlayer, GKChallenge>
+
+    /// Emitted when another player accepts a challenge issued by the local player.
+    @Signal("player", "challenge") var challenge_other_player_accepted:
+        SignalWithArguments<GKPlayer, GKChallenge>
+
+    /// Emitted when the local player completes a challenge from a friend.
+    @Signal("player", "challenge", "friend_player") var challenge_completed:
+        SignalWithArguments<GKPlayer, GKChallenge, GKPlayer>
+
+    /// Emitted when another player completes a challenge issued by the local player.
+    @Signal("player", "challenge", "friend_player") var challenge_other_player_completed:
+        SignalWithArguments<GKPlayer, GKChallenge, GKPlayer>
 
     required init(_ context: InitContext) {
         local = GameKit.GKLocalPlayer.local

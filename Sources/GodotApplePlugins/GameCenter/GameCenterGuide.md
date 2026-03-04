@@ -489,6 +489,57 @@ Exchange-related signals:
 - `exchange_completed(player, replies, match)`
 - `player_wants_to_quit_match(player, match)`
 
+## Turn-Based Matchmaker UI
+
+You can present Apple's built-in turn-based matchmaking UI and handle its
+delegate callbacks through signals.
+
+```gdscript
+var request := GKMatchRequest.new()
+request.min_players = 2
+request.max_players = 2
+
+var controller := GKTurnBasedMatchmakerViewController.create_controller(request)
+controller.did_find_match.connect(func(match: GKTurnBasedMatch) -> void:
+    print("Found turn-based match %s" % match.match_id)
+)
+controller.cancelled.connect(func(_: String) -> void:
+    print("Turn-based matchmaking cancelled")
+)
+controller.failed_with_error.connect(func(message: String) -> void:
+    print("Turn-based matchmaking failed: %s" % message)
+)
+controller.present()
+```
+
+# Challenges
+
+`GKLocalPlayer` now emits challenge-related signals once you call
+`register_listener()`.
+
+```gdscript
+local.challenge_received.connect(func(player: GKPlayer, challenge: GKChallenge) -> void:
+    print("Challenge from: %s" % (challenge.issuing_player.display_name if challenge.issuing_player else "unknown"))
+    print("Message: %s" % challenge.message)
+)
+
+local.challenge_completed.connect(func(player: GKPlayer, challenge: GKChallenge, friend_player: GKPlayer) -> void:
+    print("Challenge completed by %s" % friend_player.display_name)
+)
+```
+
+Load currently received challenges:
+
+```gdscript
+GKChallenge.load_received_challenges(func(challenges: Array, error: Variant) -> void:
+    if error:
+        print("Load challenges error: %s" % error)
+    else:
+        for challenge in challenges:
+            print("Challenge type: %s state: %s" % [challenge.challenge_type, challenge.state])
+)
+```
+
 # Leaderboards
 
 ## Report Score

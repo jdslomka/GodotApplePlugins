@@ -148,6 +148,36 @@
 		</member>
 	</members>
 	<signals>
+		<signal name="challenge_completed">
+			<param index="0" name="player" type="GKPlayer" />
+			<param index="1" name="challenge" type="GKChallenge" />
+			<param index="2" name="friend_player" type="GKPlayer" />
+			<description>
+				Emitted when the local player completes a challenge issued by [code skip-lint]friend_player[/code].
+			</description>
+		</signal>
+		<signal name="challenge_other_player_accepted">
+			<param index="0" name="player" type="GKPlayer" />
+			<param index="1" name="challenge" type="GKChallenge" />
+			<description>
+				Emitted when another player accepts a challenge that the local player issued.
+			</description>
+		</signal>
+		<signal name="challenge_other_player_completed">
+			<param index="0" name="player" type="GKPlayer" />
+			<param index="1" name="challenge" type="GKChallenge" />
+			<param index="2" name="friend_player" type="GKPlayer" />
+			<description>
+				Emitted when [code skip-lint]friend_player[/code] completes a challenge issued by the local player.
+			</description>
+		</signal>
+		<signal name="challenge_received">
+			<param index="0" name="player" type="GKPlayer" />
+			<param index="1" name="challenge" type="GKChallenge" />
+			<description>
+				Emitted when the local player receives a new challenge.
+			</description>
+		</signal>
 		<signal name="conflicting_saved_games">
 			<param index="0" name="player" type="GKPlayer" />
 			<param index="1" name="conflicting_saved_games" type="Array" />
