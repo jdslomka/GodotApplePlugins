@@ -62,7 +62,6 @@ LOWER_SKIP = {
     "scopedIDsArePersistent",
 }
 
-
 def replace_enum_types(text: str, class_name: str) -> tuple[str, bool]:
     changed = False
 
@@ -73,11 +72,16 @@ def replace_enum_types(text: str, class_name: str) -> tuple[str, bool]:
 
     text = ENUM_DOTTED_PATTERN.sub(repl, text)
 
-    enum_names = {m.group(1).split(".")[-1] for m in ENUM_DECL_PATTERN.finditer(text)}
+    declared_enum_names = {m.group(1).split(".")[-1] for m in ENUM_DECL_PATTERN.finditer(text)}
     alias_names = TYPE_ALIASES.get(class_name, set())
-    enum_names.update(alias_names)
 
-    for enum_name in sorted(enum_names):
+    for enum_name in sorted(declared_enum_names):
+        pattern = re.compile(rf'(<param[^>]*\btype="){re.escape(enum_name)}(")')
+        text, count = pattern.subn(rf'\1int\2 enum="{enum_name}"', text)
+        if count:
+            changed = True
+
+    for enum_name in sorted(alias_names):
         pattern = re.compile(rf'(<param[^>]*\btype="){re.escape(enum_name)}(")')
         text, count = pattern.subn(r'\1int\2', text)
         if count:
@@ -144,6 +148,15 @@ def convert_codeblocks(text: str) -> tuple[str, bool]:
     return new_text, changed
 
 
+def sanitize_gkerror_refs(text: str) -> tuple[str, bool]:
+    """
+    Godot's doc parser treats bare [GKError] as an unknown BBCode tag.
+    Render it as inline code instead of a link-style token.
+    """
+    new_text = text.replace("[GKError]", "[code skip-lint]GKError[/code]")
+    return new_text, new_text != text
+
+
 def process_file(path: Path) -> bool:
     text = path.read_text(encoding="utf-8")
     class_match = CLASS_PATTERN.search(text)
@@ -153,8 +166,9 @@ def process_file(path: Path) -> bool:
     text, skip_changed = add_skip_lint(text)
     text, rename_changed = rename_signal_params(text, class_name)
     text, tabs_changed = convert_codeblocks(text)
+    text, gkerror_changed = sanitize_gkerror_refs(text)
 
-    if enums_changed or skip_changed or rename_changed or tabs_changed:
+    if enums_changed or skip_changed or rename_changed or tabs_changed or gkerror_changed:
         path.write_text(text, encoding="utf-8")
         return True
     return False
